@@ -4,7 +4,7 @@ import com.google.gson.annotations.SerializedName
 import java.io.Serializable
 
 data class ForecastElement(
-    @SerializedName("dt") val unixTime : Int,
+    @SerializedName("dt") val unixTime : Long,
     @SerializedName("main") val main : ForecastElementChildMain,
     @SerializedName("weather") val weather : ArrayList<WeatherObject>,
     @SerializedName("clouds") val clouds : CloudsObject,

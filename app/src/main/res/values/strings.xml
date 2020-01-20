@@ -1,4 +1,4 @@
 <resources>
     <string name="app_name">KotlinFinal</string>
-    <string name="celsius">℃</string>
+    <string name="next_days">Next days</string>
 </resources>

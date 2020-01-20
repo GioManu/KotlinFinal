@@ -42,7 +42,7 @@ class FragmentMain : Fragment() {
 
         weather_desc.setText(forecast.weather[0].description)
         weather_temp.setText(forecast.main.tempMax.roundToInt().toString() + degree)
-        weather_city.setText("Tbilisi, Georgia") // TODO : make dynamic ??
+        weather_city.setText("Tbilisi, Georgia")
 
         Glide.with(view.context).load("http://openweathermap.org/img/wn/${forecast.weather[0].icon.ImageNameForWeatherAPI()}").into(weather_icon)
 

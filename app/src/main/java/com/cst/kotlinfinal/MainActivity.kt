@@ -1,30 +1,33 @@
 package com.cst.kotlinfinal
 
 import android.annotation.SuppressLint
-import android.content.Context
-import android.net.ConnectivityManager
 import android.os.AsyncTask
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.View
-import android.widget.Toast
+import com.cst.kotlinfinal.forecastObjects.ForecastElement
 import com.cst.kotlinfinal.forecastObjects.ResponseObject
 import com.cst.kotlinfinal.fragments.FragmentMain
+import com.cst.kotlinfinal.fragments.FragmentWeatherDays
 import com.cst.kotlinfinal.fragments.FragmentWeatherHours
 import com.google.gson.Gson
+import com.soywiz.klock.Date
+import com.soywiz.klock.DateFormat
+import com.soywiz.klock.DateTime
+import com.soywiz.klock.parse
 import kotlinx.android.synthetic.main.activity_main.*
 import org.jetbrains.anko.*
 import java.io.BufferedInputStream
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.net.URL
-
+import java.util.*
+import kotlin.collections.ArrayList
 
 
 class MainActivity : AppCompatActivity() {
 
-    val apiUrl : String = "https://api.openweathermap.org/data/2.5/forecast?q=Tbilisi&units=metric&APPID=baf2aed056472b3da6f87e7c0400c4be"
+    private val apiUrl : String = "https://api.openweathermap.org/data/2.5/forecast?q=Tbilisi&units=metric&APPID=baf2aed056472b3da6f87e7c0400c4be"
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -62,11 +65,18 @@ class MainActivity : AppCompatActivity() {
                 try {
                     val objs = gson.fromJson(it, ResponseObject::class.java)
 
-                    FragmentMain.createInstance(objs.list[0]).run {
+                    val chunks_days = GetDaysChunksFromList(objs.list)
+                    val today_forecast = GetTodayForecastFromList(objs.list)
+
+                    FragmentWeatherDays.createInstance(chunks_days).run {
+                        addFragment(R.id.main_weather_days_fragment,this)
+                    }
+
+                    FragmentMain.createInstance(today_forecast[0]).run {
                         addFragment(R.id.main_header_fragment, this)
                     }
 
-                    FragmentWeatherHours.createInstance(ArrayList(objs.list.take(10))).run {
+                    FragmentWeatherHours.createInstance(ArrayList(today_forecast)).run {
                         addFragment(R.id.main_weather_hours_fragment,this)
                     }
 
@@ -100,4 +110,31 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    fun GetDaysChunksFromList(list : List<ForecastElement>) : ArrayList<List<ForecastElement>> {
+        val filtered_days_list = list.filter {
+            DateFormat("yyyy-MM-dd HH:mm:ss")
+                .parse(it.dateText).format("HH:mm") == "12:00"
+                    ||
+                    DateFormat("yyyy-MM-dd HH:mm:ss")
+                        .parse(it.dateText).format("HH:mm") == "03:00"
+        }.sortedBy {
+            DateFormat("yyyy-MM-dd HH:mm:ss")
+                .parse(it.dateText).format("d HH:mm")
+        }
+
+        return ArrayList(filtered_days_list.chunked(2).drop(1))
+    }
+
+    fun GetTodayForecastFromList(list:List<ForecastElement>) : ArrayList<ForecastElement> {
+        val tday = DateTime.nowLocal().format("yyyy-MM-dd")
+
+        val tday_list = list.filter {
+            DateFormat("yyyy-MM-dd HH:mm:ss")
+                .parse(it.dateText).format("yyyy-MM-dd") == tday
+        }.sortedBy {
+            DateFormat("yyyy-MM-dd HH:mm:ss")
+                .parse(it.dateText).format("HH:mm")
+        }
+        return ArrayList(tday_list)
+    }
 }

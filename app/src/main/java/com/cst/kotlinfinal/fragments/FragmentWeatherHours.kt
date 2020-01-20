@@ -35,7 +35,7 @@ class FragmentWeatherHours : Fragment() {
     }
 
     companion object {
-        private val ARG_FORECAST_LIST = "ARG_FORECAST_LIST"
+        private const val ARG_FORECAST_LIST = "ARG_FORECAST_LIST"
 
         fun createInstance(forecastList : ArrayList<ForecastElement>): FragmentWeatherHours {
 
